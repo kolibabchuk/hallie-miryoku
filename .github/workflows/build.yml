@@ -61,8 +61,9 @@ jobs:
           # Hallie keymap
           cp layout/overlay/config/hallie.keymap miryoku_zmk/config/hallie.keymap
 
-          # Core miryoku.dtsi with 3-arg MIRYOKU_X for encoder support
+          # Core files with 3-arg MIRYOKU_X for encoder support
           cp layout/overlay/miryoku/miryoku.dtsi miryoku_zmk/miryoku/miryoku.dtsi
+          cp layout/overlay/miryoku/miryoku_double_tap_guard.dtsi miryoku_zmk/miryoku/miryoku_double_tap_guard.dtsi
 
           # Custom config (per-layer mapping aliases + extra includes)
           cp layout/overlay/miryoku/custom_config.h miryoku_zmk/miryoku/custom_config.h
