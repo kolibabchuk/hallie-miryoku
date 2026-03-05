@@ -53,10 +53,9 @@ jobs:
       - name: Checkout miryoku_zmk (master + encoder-test merged)
         run: |
           echo "::group::Clone miryoku_zmk"
-          git clone --depth 50 "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
+          git clone "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
           cd miryoku_zmk
-          git fetch origin "$MIRYOKU_ZMK_REF"
-          git merge FETCH_HEAD --no-edit
+          git merge "origin/$MIRYOKU_ZMK_REF" --no-edit
           echo "::endgroup::"
 
       - name: Overlay layout files onto miryoku_zmk
