@@ -55,6 +55,8 @@ jobs:
           echo "::group::Clone miryoku_zmk"
           git clone "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
           cd miryoku_zmk
+          git config user.name "CI"
+          git config user.email "ci@localhost"
           git merge "origin/$MIRYOKU_ZMK_REF" --no-edit
           echo "::endgroup::"
 
