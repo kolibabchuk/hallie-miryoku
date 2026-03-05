@@ -1,0 +1,178 @@
+name: Build Hallie Miryoku Firmware
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      miryoku_zmk_repo:
+        description: 'miryoku_zmk repository (user/repo)'
+        default: 'manna-harbour/miryoku_zmk'
+      miryoku_zmk_ref:
+        description: 'miryoku_zmk branch/tag/SHA'
+        default: 'encoder-test'
+      zmk_ref:
+        description: 'ZMK firmware branch/tag (zmkfirmware/zmk)'
+        default: 'main'
+      keyboards_repo:
+        description: 'Hallie board module repository (user/repo)'
+        default: 'SplittedSpace/zmk-keyboards-splittedspace'
+      keyboards_ref:
+        description: 'Hallie board module branch/tag'
+        default: 'main'
+      feature_repo:
+        description: 'Hallie feature module repository (user/repo)'
+        default: 'SplittedSpace/zmk-feature-splittedspace'
+      feature_ref:
+        description: 'Hallie feature module branch/tag'
+        default: 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [hallie_left, hallie_right]
+    env:
+      MIRYOKU_ZMK_REPO: ${{ inputs.miryoku_zmk_repo || 'manna-harbour/miryoku_zmk' }}
+      MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || 'encoder-test' }}
+      ZMK_REF: ${{ inputs.zmk_ref || 'main' }}
+      KEYBOARDS_REPO: ${{ inputs.keyboards_repo || 'SplittedSpace/zmk-keyboards-splittedspace' }}
+      KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'main' }}
+      FEATURE_REPO: ${{ inputs.feature_repo || 'SplittedSpace/zmk-feature-splittedspace' }}
+      FEATURE_REF: ${{ inputs.feature_ref || 'main' }}
+    steps:
+      - name: Checkout layout config
+        uses: actions/checkout@v4
+        with:
+          path: layout
+
+      - name: Checkout miryoku_zmk (master + encoder-test merged)
+        run: |
+          echo "::group::Clone miryoku_zmk"
+          git clone --depth 50 "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
+          cd miryoku_zmk
+          git fetch origin "$MIRYOKU_ZMK_REF"
+          git merge "origin/$MIRYOKU_ZMK_REF" --no-edit
+          echo "::endgroup::"
+
+      - name: Overlay layout files onto miryoku_zmk
+        run: |
+          echo "::group::Overlay layout files"
+
+          # Hallie keymap
+          cp layout/overlay/config/hallie.keymap miryoku_zmk/config/hallie.keymap
+
+          # Custom config (per-layer mapping aliases)
+          cp layout/overlay/miryoku/custom_config.h miryoku_zmk/miryoku/custom_config.h
+
+          # Custom behaviors (Globe, Hyper, input switch)
+          cp layout/overlay/miryoku/miryoku_behaviors.dtsi miryoku_zmk/miryoku/miryoku_behaviors.dtsi
+          cp layout/overlay/miryoku/miryoku_behaviors.h miryoku_zmk/miryoku/miryoku_behaviors.h
+
+          # 42-key physical layout mapping
+          mkdir -p miryoku_zmk/miryoku/mapping/42
+          cp layout/overlay/miryoku/mapping/42/hallie.h miryoku_zmk/miryoku/mapping/42/hallie.h
+
+          # Layer list with encoder bindings
+          cp layout/overlay/miryoku/miryoku_babel/miryoku_layer_list.h miryoku_zmk/miryoku/miryoku_babel/miryoku_layer_list.h
+
+          echo "::endgroup::"
+
+      - name: Assemble config defines
+        run: |
+          echo "::group::Config defines"
+
+          configfile="miryoku_zmk/miryoku/custom_config.h"
+          tmpfile=$(mktemp)
+
+          # Keyboard identifier (required by miryoku)
+          echo '#define MIRYOKU_KEYBOARD_HALLIE' > "$tmpfile"
+
+          # Miryoku options — edit these to change layout preferences
+          echo '#define MIRYOKU_NAV_INVERTEDT' >> "$tmpfile"
+          echo '#define MIRYOKU_CLIPBOARD_MAC' >> "$tmpfile"
+
+          # Append the rest of custom_config.h
+          cat "$configfile" >> "$tmpfile"
+          mv "$tmpfile" "$configfile"
+
+          cat "$configfile"
+          echo "::endgroup::"
+
+      - name: Create board Kconfig overrides
+        run: |
+          echo "::group::Kconfig"
+
+          conffile="miryoku_zmk/config/${{ matrix.board }}.conf"
+
+          # Common settings for both halves
+          echo 'CONFIG_ZMK_STUDIO=n' >> "$conffile"
+          echo 'CONFIG_ZMK_POINTING=y' >> "$conffile"
+          echo 'CONFIG_ZMK_IDLE_SLEEP_TIMEOUT=3600000' >> "$conffile"
+
+          # Apple VID/PID for Globe key (left half only — it has USB)
+          if [ "${{ matrix.board }}" = "hallie_left" ]; then
+            echo 'CONFIG_USB_DEVICE_VID=0x05AC' >> "$conffile"
+            echo 'CONFIG_USB_DEVICE_PID=0x0267' >> "$conffile"
+          fi
+
+          cat "$conffile"
+          echo "::endgroup::"
+
+      - name: Clone ZMK firmware
+        run: |
+          git clone -b "$ZMK_REF" --depth 1 "https://github.com/zmkfirmware/zmk.git" zmk
+
+      - name: Clone vendor modules
+        run: |
+          git clone -b "$KEYBOARDS_REF" --depth 1 "https://github.com/$KEYBOARDS_REPO.git" zmk-keyboards
+          git clone -b "$FEATURE_REF" --depth 1 "https://github.com/$FEATURE_REPO.git" zmk-feature
+
+      - name: Cache Zephyr modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            zmk/modules/
+            zmk/zephyr/
+          key: zephyr-${{ runner.os }}-${{ hashFiles('zmk/app/west.yml') }}
+        timeout-minutes: 2
+        continue-on-error: true
+
+      - name: Setup west workspace
+        run: |
+          echo "::group::West setup"
+          cd zmk
+          west init -l app
+          west update
+          west zephyr-export
+          echo "::endgroup::"
+
+      - name: Build firmware
+        run: |
+          echo "::group::Build ${{ matrix.board }}"
+          cd zmk/app
+          west build -b ${{ matrix.board }} -- \
+            -DZMK_CONFIG="${GITHUB_WORKSPACE}/miryoku_zmk/config" \
+            -DZMK_EXTRA_MODULES="${GITHUB_WORKSPACE}/zmk-keyboards;${GITHUB_WORKSPACE}/zmk-feature"
+          echo "::endgroup::"
+
+      - name: Collect artifacts
+        run: |
+          mkdir -p artifacts
+          for ext in uf2 bin hex; do
+            file="zmk/app/build/zephyr/zmk.$ext"
+            if [ -f "$file" ]; then
+              cp "$file" "artifacts/${{ matrix.board }}.${ext}"
+              break
+            fi
+          done
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: hallie-${{ matrix.board }}
+          path: artifacts/

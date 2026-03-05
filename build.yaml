@@ -1,0 +1,3 @@
+include:
+  - board: hallie_left
+  - board: hallie_right
