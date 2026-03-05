@@ -13,7 +13,7 @@ on:
         default: 'master'
       zmk_ref:
         description: 'ZMK firmware branch/tag (zmkfirmware/zmk)'
-        default: 'main'
+        default: 'v0.3-branch'
       keyboards_repo:
         description: 'Hallie board module repository (user/repo)'
         default: 'SplittedSpace/zmk-keyboards-splittedspace'
@@ -39,7 +39,7 @@ jobs:
     env:
       MIRYOKU_ZMK_REPO: ${{ inputs.miryoku_zmk_repo || 'manna-harbour/miryoku_zmk' }}
       MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || 'master' }}
-      ZMK_REF: ${{ inputs.zmk_ref || 'main' }}
+      ZMK_REF: ${{ inputs.zmk_ref || 'v0.3-branch' }}
       KEYBOARDS_REPO: ${{ inputs.keyboards_repo || 'SplittedSpace/zmk-keyboards-splittedspace' }}
       KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'main' }}
       FEATURE_REPO: ${{ inputs.feature_repo || 'SplittedSpace/zmk-feature-splittedspace' }}
