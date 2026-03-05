@@ -9,8 +9,8 @@ on:
         description: 'miryoku_zmk repository (user/repo)'
         default: 'manna-harbour/miryoku_zmk'
       miryoku_zmk_ref:
-        description: 'miryoku_zmk branch/tag/SHA'
-        default: 'encoder-test'
+        description: 'miryoku_zmk branch/tag'
+        default: 'master'
       zmk_ref:
         description: 'ZMK firmware branch/tag (zmkfirmware/zmk)'
         default: 'main'
@@ -38,7 +38,7 @@ jobs:
         board: [hallie_left, hallie_right]
     env:
       MIRYOKU_ZMK_REPO: ${{ inputs.miryoku_zmk_repo || 'manna-harbour/miryoku_zmk' }}
-      MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || 'encoder-test' }}
+      MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || 'master' }}
       ZMK_REF: ${{ inputs.zmk_ref || 'main' }}
       KEYBOARDS_REPO: ${{ inputs.keyboards_repo || 'SplittedSpace/zmk-keyboards-splittedspace' }}
       KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'main' }}
@@ -50,15 +50,9 @@ jobs:
         with:
           path: layout
 
-      - name: Checkout miryoku_zmk (master + encoder-test merged)
+      - name: Checkout miryoku_zmk
         run: |
-          echo "::group::Clone miryoku_zmk"
-          git clone "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
-          cd miryoku_zmk
-          git config user.name "CI"
-          git config user.email "ci@localhost"
-          git merge "origin/$MIRYOKU_ZMK_REF" --no-edit
-          echo "::endgroup::"
+          git clone -b "$MIRYOKU_ZMK_REF" --depth 1 "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
 
       - name: Overlay layout files onto miryoku_zmk
         run: |
@@ -67,7 +61,10 @@ jobs:
           # Hallie keymap
           cp layout/overlay/config/hallie.keymap miryoku_zmk/config/hallie.keymap
 
-          # Custom config (per-layer mapping aliases)
+          # Core miryoku.dtsi with 3-arg MIRYOKU_X for encoder support
+          cp layout/overlay/miryoku/miryoku.dtsi miryoku_zmk/miryoku/miryoku.dtsi
+
+          # Custom config (per-layer mapping aliases + extra includes)
           cp layout/overlay/miryoku/custom_config.h miryoku_zmk/miryoku/custom_config.h
 
           # Custom behaviors (Globe, Hyper, input switch)
