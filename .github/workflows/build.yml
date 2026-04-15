@@ -9,23 +9,23 @@ on:
         description: 'miryoku_zmk repository (user/repo)'
         default: 'manna-harbour/miryoku_zmk'
       miryoku_zmk_ref:
-        description: 'miryoku_zmk branch/tag'
-        default: 'master'
+        description: 'miryoku_zmk branch/tag/SHA'
+        default: '559aa4beae75cb3206ab411b7da2adb9665c6896'
       zmk_ref:
         description: 'ZMK firmware branch/tag (zmkfirmware/zmk)'
-        default: 'v0.3-branch'
+        default: 'v0.3.0'
       keyboards_repo:
         description: 'Hallie board module repository (user/repo)'
         default: 'SplittedSpace/zmk-keyboards-splittedspace'
       keyboards_ref:
-        description: 'Hallie board module branch/tag'
-        default: 'main'
+        description: 'Hallie board module branch/tag/SHA'
+        default: 'e83cb6caf022f256bb94747607d6ab084d2580bc'
       feature_repo:
         description: 'Hallie feature module repository (user/repo)'
         default: 'SplittedSpace/zmk-feature-splittedspace'
       feature_ref:
-        description: 'Hallie feature module branch/tag'
-        default: 'main'
+        description: 'Hallie feature module branch/tag/SHA'
+        default: 'fa2bf40cd5f375ad9856fd4d1266ae9d1d0c2055'
 
 jobs:
   build:
@@ -38,12 +38,12 @@ jobs:
         board: [hallie_left, hallie_right]
     env:
       MIRYOKU_ZMK_REPO: ${{ inputs.miryoku_zmk_repo || 'manna-harbour/miryoku_zmk' }}
-      MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || 'master' }}
-      ZMK_REF: ${{ inputs.zmk_ref || 'v0.3-branch' }}
+      MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || '559aa4beae75cb3206ab411b7da2adb9665c6896' }}
+      ZMK_REF: ${{ inputs.zmk_ref || 'v0.3.0' }}
       KEYBOARDS_REPO: ${{ inputs.keyboards_repo || 'SplittedSpace/zmk-keyboards-splittedspace' }}
-      KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'main' }}
+      KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'e83cb6caf022f256bb94747607d6ab084d2580bc' }}
       FEATURE_REPO: ${{ inputs.feature_repo || 'SplittedSpace/zmk-feature-splittedspace' }}
-      FEATURE_REF: ${{ inputs.feature_ref || 'main' }}
+      FEATURE_REF: ${{ inputs.feature_ref || 'fa2bf40cd5f375ad9856fd4d1266ae9d1d0c2055' }}
     steps:
       - name: Checkout layout config
         uses: actions/checkout@v4
@@ -52,7 +52,11 @@ jobs:
 
       - name: Checkout miryoku_zmk
         run: |
-          git clone -b "$MIRYOKU_ZMK_REF" --depth 1 "https://github.com/$MIRYOKU_ZMK_REPO.git" miryoku_zmk
+          git init miryoku_zmk
+          cd miryoku_zmk
+          git remote add origin "https://github.com/$MIRYOKU_ZMK_REPO.git"
+          git fetch --depth 1 origin "$MIRYOKU_ZMK_REF"
+          git checkout FETCH_HEAD
 
       - name: Overlay layout files onto miryoku_zmk
         run: |
@@ -125,12 +129,24 @@ jobs:
 
       - name: Clone ZMK firmware
         run: |
-          git clone -b "$ZMK_REF" --depth 1 "https://github.com/zmkfirmware/zmk.git" zmk
+          git init zmk
+          cd zmk
+          git remote add origin "https://github.com/zmkfirmware/zmk.git"
+          git fetch --depth 1 origin "$ZMK_REF"
+          git checkout FETCH_HEAD
 
       - name: Clone vendor modules
         run: |
-          git clone -b "$KEYBOARDS_REF" --depth 1 "https://github.com/$KEYBOARDS_REPO.git" zmk-keyboards
-          git clone -b "$FEATURE_REF" --depth 1 "https://github.com/$FEATURE_REPO.git" zmk-feature
+          for pair in "zmk-keyboards:$KEYBOARDS_REPO:$KEYBOARDS_REF" "zmk-feature:$FEATURE_REPO:$FEATURE_REF"; do
+            IFS=: read -r dir repo ref <<< "$pair"
+            git init "$dir"
+            (
+              cd "$dir"
+              git remote add origin "https://github.com/$repo.git"
+              git fetch --depth 1 origin "$ref"
+              git checkout FETCH_HEAD
+            )
+          done
 
       - name: Cache Zephyr modules
         uses: actions/cache@v4
