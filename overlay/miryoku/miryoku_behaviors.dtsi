@@ -3,25 +3,43 @@
 
 / {
   behaviors {
+    // urob-style hold-tap (5 of 6 knobs; omits per-hand
+    // hold-trigger-key-positions which would require splitting u_mt into
+    // hrm_l/hrm_r + overriding BASE/EXTRA/TAP alphas). Most of urob's
+    // misfire-prevention comes from require-prior-idle-ms + balanced.
+    //   - balanced: hold only if the partner key presses AND releases
+    //   - 280ms term: wide enough that the idle/release checks do the work
+    //   - quick-tap 175ms: repeating the same key forces a tap (no stray mod)
+    //   - require-prior-idle 150ms: during rolling typing, always tap
+    //   - hold-trigger-on-release: decide on partner release, not press
     u_mt: u_mt {
       compatible = "zmk,behavior-hold-tap";
       #binding-cells = <2>;
-      tapping-term-ms = <U_TAPPING_TERM>;
-      flavor = "tap-preferred";
+      flavor = "balanced";
+      tapping-term-ms = <280>;
+      quick-tap-ms = <175>;
+      require-prior-idle-ms = <150>;
+      hold-trigger-on-release;
       bindings = <&kp>, <&kp>;
     };
     u_lt: u_lt {
       compatible = "zmk,behavior-hold-tap";
       #binding-cells = <2>;
-      tapping-term-ms = <U_TAPPING_TERM>;
-      flavor = "tap-preferred";
+      flavor = "balanced";
+      tapping-term-ms = <280>;
+      quick-tap-ms = <175>;
+      require-prior-idle-ms = <150>;
+      hold-trigger-on-release;
       bindings = <&mo>, <&kp>;
     };
     mt_input_switch: mt_input_switch {
       compatible = "zmk,behavior-hold-tap";
       #binding-cells = <2>;
-      tapping-term-ms = <U_TAPPING_TERM>;
-      flavor = "tap-preferred";
+      flavor = "balanced";
+      tapping-term-ms = <280>;
+      quick-tap-ms = <175>;
+      require-prior-idle-ms = <150>;
+      hold-trigger-on-release;
       bindings = <&kp>, <&input_switch>;
     };
     td_bslh_globe_base: td_bslh_globe_base {

@@ -46,7 +46,7 @@ jobs:
       FEATURE_REF: ${{ inputs.feature_ref || 'fa2bf40cd5f375ad9856fd4d1266ae9d1d0c2055' }}
     steps:
       - name: Checkout layout config
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: layout
 
@@ -151,7 +151,7 @@ jobs:
           git checkout FETCH_HEAD
 
       - name: Cache Zephyr modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             zmk/modules/
@@ -190,7 +190,7 @@ jobs:
           done
 
       - name: Upload firmware
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hallie-${{ matrix.board }}
           path: artifacts/
