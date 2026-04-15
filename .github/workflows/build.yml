@@ -137,16 +137,18 @@ jobs:
 
       - name: Clone vendor modules
         run: |
-          for pair in "zmk-keyboards:$KEYBOARDS_REPO:$KEYBOARDS_REF" "zmk-feature:$FEATURE_REPO:$FEATURE_REF"; do
-            IFS=: read -r dir repo ref <<< "$pair"
-            git init "$dir"
-            (
-              cd "$dir"
-              git remote add origin "https://github.com/$repo.git"
-              git fetch --depth 1 origin "$ref"
-              git checkout FETCH_HEAD
-            )
-          done
+          git init zmk-keyboards
+          cd zmk-keyboards
+          git remote add origin "https://github.com/$KEYBOARDS_REPO.git"
+          git fetch --depth 1 origin "$KEYBOARDS_REF"
+          git checkout FETCH_HEAD
+          cd ..
+
+          git init zmk-feature
+          cd zmk-feature
+          git remote add origin "https://github.com/$FEATURE_REPO.git"
+          git fetch --depth 1 origin "$FEATURE_REF"
+          git checkout FETCH_HEAD
 
       - name: Cache Zephyr modules
         uses: actions/cache@v4
