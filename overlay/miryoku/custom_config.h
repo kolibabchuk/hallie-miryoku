@@ -30,11 +30,12 @@ U_BOOT,            &u_to_U_TAP,       &u_to_U_EXTRA,     &u_to_U_BASE,      &kp 
 U_NA,              &kp RALT,          &u_to_U_NUM,       &u_to_U_NAV,       &kp K_CONTEXT_MENU, U_RDO,            U_PST,             U_CPY,             U_CUT,             U_UND,             \
 U_NP,              U_NP,              U_NA,              U_NA,              U_NA,              &kp RET,           &kp BSPC,          &kp DEL,           U_NP,              U_NP
 
-// MOUSE: PrtSc / ScrollLock / ContextMenu, and a reordered wheel/mouse cluster
-// (U_NU U_WH_R U_MS_U U_WH_L U_WH_D on row 0, U_NU U_MS_L U_MS_D U_MS_R U_WH_U on row 1)
+// MOUSE: PrtSc / ScrollLock / ContextMenu on K04/K14/K24. Right-hand index
+// stretch (K05/K15) mirrors NAV's PgUp/PgDn instead of U_NU, since the MOUSE
+// layer often needs page-scroll too.
 #define MIRYOKU_LAYER_MOUSE \
-U_BOOT,            &u_to_U_TAP,       &u_to_U_EXTRA,     &u_to_U_BASE,      &kp PSCRN,         U_NU,              U_WH_R,            U_MS_U,            U_WH_L,            U_WH_D,            \
-&kp LGUI,          &kp LALT,          &kp LCTRL,         &kp LSHFT,         &kp SCROLLLOCK,    U_NU,              U_MS_L,            U_MS_D,            U_MS_R,            U_WH_U,            \
+U_BOOT,            &u_to_U_TAP,       &u_to_U_EXTRA,     &u_to_U_BASE,      &kp PSCRN,         &kp PG_UP,         U_WH_R,            U_MS_U,            U_WH_L,            U_WH_D,            \
+&kp LGUI,          &kp LALT,          &kp LCTRL,         &kp LSHFT,         &kp SCROLLLOCK,    &kp PG_DN,         U_MS_L,            U_MS_D,            U_MS_R,            U_WH_U,            \
 U_NA,              &kp RALT,          &u_to_U_SYM,       &u_to_U_MOUSE,     &kp K_CONTEXT_MENU, U_RDO,            U_PST,             U_CPY,             U_CUT,             U_UND,             \
 U_NP,              U_NP,              U_NA,              U_NA,              U_NA,              U_BTN2,            U_BTN1,            U_BTN3,            U_NP,              U_NP
 
