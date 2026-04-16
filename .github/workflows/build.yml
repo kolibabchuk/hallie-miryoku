@@ -31,7 +31,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: zmkfirmware/zmk-build-arm:stable
+      # Pinned to the stable manifest-list digest pushed 2025-10-03. Unpinning
+      # is as simple as dropping the @sha256:... suffix.
+      image: zmkfirmware/zmk-build-arm:stable@sha256:edb1c953438c6f720ddb79c3762f3972013b7fbbaf4fff3592fc869983e7afc5
     strategy:
       fail-fast: false
       matrix:
