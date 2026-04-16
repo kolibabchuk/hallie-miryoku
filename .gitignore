@@ -4,6 +4,4 @@ build/
 *.hex
 *.elf
 .west/
-assets/
 .DS_Store
-*.md

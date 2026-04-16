@@ -2,7 +2,15 @@ name: Build Hallie Miryoku Firmware
 
 on:
   push:
+    paths:
+      - 'overlay/**'
+      - 'assets/keymap-drawer/**'
+      - '.github/workflows/build.yml'
   pull_request:
+    paths:
+      - 'overlay/**'
+      - 'assets/keymap-drawer/**'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
     inputs:
       miryoku_zmk_repo:
@@ -196,3 +204,79 @@ jobs:
         with:
           name: hallie-${{ matrix.board }}
           path: artifacts/
+
+      # Keymap is identical on both halves; only snapshot hallie_left's
+      # preprocessed DTS for downstream keymap-drawer consumption.
+      - name: Snapshot preprocessed DTS for keymap-drawer
+        if: matrix.board == 'hallie_left' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+        run: |
+          mkdir -p keymap-drawer-input
+          # Zephyr emits the C-preprocessed DTS as zephyr.dts.pre.tmp, then
+          # resolves it into zephyr.dts. keymap-drawer works on either.
+          for candidate in zephyr.dts.pre.tmp zephyr.dts.pre zephyr.dts; do
+            if [ -f "zmk/app/build/zephyr/$candidate" ]; then
+              cp "zmk/app/build/zephyr/$candidate" keymap-drawer-input/keymap.pre.dts
+              echo "Using $candidate"
+              break
+            fi
+          done
+          test -f keymap-drawer-input/keymap.pre.dts
+
+      - name: Upload preprocessed DTS
+        if: matrix.board == 'hallie_left' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-artifact@v7
+        with:
+          name: keymap-preprocessed
+          path: keymap-drawer-input/
+          retention-days: 1
+
+  draw-keymap:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout main for layout-override.json
+        uses: actions/checkout@v6
+        with:
+          path: main
+
+      - name: Checkout assets branch
+        uses: actions/checkout@v6
+        with:
+          ref: assets
+          path: assets
+
+      - name: Download preprocessed DTS
+        uses: actions/download-artifact@v7
+        with:
+          name: keymap-preprocessed
+          path: keymap-input/
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install keymap-drawer
+        run: pip install keymap-drawer
+
+      - name: Parse and draw
+        run: |
+          keymap parse -z keymap-input/keymap.pre.dts \
+            --layout-map-file main/assets/keymap-drawer/layout-override.json \
+            > /tmp/parsed.yaml
+          keymap draw /tmp/parsed.yaml > assets/keymap.svg
+
+      - name: Commit SVG to assets branch
+        working-directory: assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add keymap.svg
+          if git diff --staged --quiet; then
+            echo "No SVG changes"
+          else
+            git commit -m "chore: regenerate keymap SVG [skip ci]"
+            git push
+          fi

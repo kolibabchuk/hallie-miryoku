@@ -1,0 +1,248 @@
+draw_config:
+  key_w: 70
+  key_h: 56
+  split_gap: 20
+  shrink_wide_legends: 4
+  svg_extra_style: |
+    @import url('https://fonts.googleapis.com/css2?family=Roboto');
+    svg.keymap {
+      font-family: "Source Code Pro", monospace;
+      font-weight: 400;
+    }
+    /* Navy blue keys on light background */
+    rect.key {
+      fill: #1a2240 !important;
+      stroke: #2a3460 !important;
+    }
+    rect.side {
+      fill: #111832 !important;
+      filter: none !important;
+    }
+    /* Light text on dark keys */
+    svg.keymap .tap {
+      font-size: 13px;
+      fill: #e8eaf0 !important;
+    }
+    svg.keymap .hold {
+      font-size: 10px;
+      opacity: 0.7;
+      fill: #c0c4d0 !important;
+    }
+    /* Layer activator hold legends - orange accent */
+    svg.keymap text.layer-activator {
+      fill: #E8952B !important;
+      opacity: 1 !important;
+      font-size: 11px !important;
+      font-weight: 500 !important;
+    }
+    /* Enlarged single-symbol keys on non-base layers */
+    /* Left homerow modifiers (13-16) - BUTTON, MOUSE, MEDIA, NUM only */
+    [class*="layer-BUTTON"] .keypos-13 .tap,
+    [class*="layer-BUTTON"] .keypos-14 .tap,
+    [class*="layer-BUTTON"] .keypos-15 .tap,
+    [class*="layer-BUTTON"] .keypos-16 .tap,
+    [class*="layer-MOUSE"] .keypos-13 .tap,
+    [class*="layer-MOUSE"] .keypos-14 .tap,
+    [class*="layer-MOUSE"] .keypos-15 .tap,
+    [class*="layer-MOUSE"] .keypos-16 .tap,
+    [class*="layer-MEDIA"] .keypos-13 .tap,
+    [class*="layer-MEDIA"] .keypos-14 .tap,
+    [class*="layer-MEDIA"] .keypos-15 .tap,
+    [class*="layer-MEDIA"] .keypos-16 .tap,
+    /* Right homerow symbols (19-21) - all function layers */
+    g[class*="layer-"]:not([class*="layer-BASE"]):not([class*="layer-EXTRA"]):not([class*="layer-TAP"]) .keypos-19 .tap,
+    g[class*="layer-"]:not([class*="layer-BASE"]):not([class*="layer-EXTRA"]):not([class*="layer-TAP"]) .keypos-20 .tap,
+    g[class*="layer-"]:not([class*="layer-BASE"]):not([class*="layer-EXTRA"]):not([class*="layer-TAP"]) .keypos-21 .tap,
+    /* Position 22 (⌘) - NUM, SYM, FUN, BUTTON only */
+    [class*="layer-NUM"] .keypos-22 .tap,
+    [class*="layer-SYM"] .keypos-22 .tap,
+    [class*="layer-FUN"] .keypos-22 .tap,
+    [class*="layer-BUTTON"] .keypos-22 .tap,
+    /* Position 8 - arrows on NAV, MOUSE */
+    [class*="layer-NAV"] .keypos-8 .tap,
+    [class*="layer-MOUSE"] .keypos-8 .tap,
+    [class*="layer-MEDIA"] .keypos-8 .tap,
+    /* Position 11 (ESC symbol) - all except BUTTON */
+    [class*="layer-NAV"] .keypos-11 .tap,
+    [class*="layer-MOUSE"] .keypos-11 .tap,
+    [class*="layer-MEDIA"] .keypos-11 .tap,
+    [class*="layer-NUM"] .keypos-11 .tap,
+    [class*="layer-SYM"] .keypos-11 .tap,
+    [class*="layer-FUN"] .keypos-11 .tap,
+    /* Positions 17,18 (⊕) - BUTTON only */
+    [class*="layer-BUTTON"] .keypos-17 .tap,
+    [class*="layer-BUTTON"] .keypos-18 .tap,
+    /* Position 26 (⌥) - NAV, MOUSE, MEDIA */
+    [class*="layer-NAV"] .keypos-26 .tap,
+    [class*="layer-MOUSE"] .keypos-26 .tap,
+    [class*="layer-MEDIA"] .keypos-26 .tap,
+    /* Position 33 (⌥) - NUM, SYM, FUN */
+    [class*="layer-NUM"] .keypos-33 .tap,
+    [class*="layer-SYM"] .keypos-33 .tap,
+    [class*="layer-FUN"] .keypos-33 .tap,
+    /* Position 35 (⊕) - all except BUTTON */
+    [class*="layer-NAV"] .keypos-35 .tap,
+    [class*="layer-MOUSE"] .keypos-35 .tap,
+    [class*="layer-MEDIA"] .keypos-35 .tap,
+    [class*="layer-NUM"] .keypos-35 .tap,
+    [class*="layer-SYM"] .keypos-35 .tap,
+    [class*="layer-FUN"] .keypos-35 .tap,
+    /* Thumb symbols - typing layers */
+    [class*="layer-BASE"] .keypos-36 .tap,
+    [class*="layer-BASE"] .keypos-37 .tap,
+    [class*="layer-BASE"] .keypos-38 .tap,
+    [class*="layer-BASE"] .keypos-39 .tap,
+    [class*="layer-BASE"] .keypos-40 .tap,
+    [class*="layer-BASE"] .keypos-41 .tap,
+    [class*="layer-EXTRA"] .keypos-36 .tap,
+    [class*="layer-EXTRA"] .keypos-37 .tap,
+    [class*="layer-EXTRA"] .keypos-38 .tap,
+    [class*="layer-EXTRA"] .keypos-39 .tap,
+    [class*="layer-EXTRA"] .keypos-40 .tap,
+    [class*="layer-EXTRA"] .keypos-41 .tap,
+    [class*="layer-TAP"] .keypos-36 .tap,
+    [class*="layer-TAP"] .keypos-37 .tap,
+    [class*="layer-TAP"] .keypos-38 .tap,
+    [class*="layer-TAP"] .keypos-39 .tap,
+    [class*="layer-TAP"] .keypos-40 .tap,
+    [class*="layer-TAP"] .keypos-41 .tap,
+    /* Thumb symbols - function layers */
+    [class*="layer-FUN"] .keypos-37 .tap,
+    [class*="layer-FUN"] .keypos-38 .tap,
+    [class*="layer-NAV"] .keypos-39 .tap,
+    [class*="layer-NAV"] .keypos-40 .tap,
+    [class*="layer-NAV"] .keypos-41 .tap,
+    [class*="layer-MEDIA"] .keypos-39 .tap,
+    [class*="layer-MEDIA"] .keypos-40 .tap,
+    [class*="layer-MEDIA"] .keypos-41 .tap {
+      font-size: 26px !important;
+    }
+    /* Held key - pink accent showing layer activator */
+    rect.held {
+      fill: #4a1535 !important;
+      stroke: #7b2858 !important;
+    }
+    /* Clean layer headers */
+    svg.keymap text.label {
+      font-family: "Source Code Pro", monospace;
+      font-size: 18px;
+      font-weight: 400;
+      fill: #555e6e !important;
+      paint-order: stroke;
+      stroke: none !important;
+    }
+
+layout:
+  qmk_keyboard: corne_rotated
+  layout_name: LAYOUT_split_3x6_3
+
+layers:
+  BASE (Colemak-DH):
+    - [{t: '\', h: ⊕, s: "2x: BASE"}, Q, W, F, P, B,
+       J, L, U, Y, "'", {t: '[', h: ⊕}]
+    - [{t: ']', h: Hyper}, {t: A, h: ⌘}, {t: R, h: ⌥}, {t: S, h: ⌃}, {t: T, h: ⇧}, G,
+       M, {t: N, h: ⇧}, {t: E, h: ⌃}, {t: I, h: ⌥}, {t: O, h: ⌘}, {t: "'", h: Hyper}]
+    - [{t: ⌃+␣, h: ⇧}, {t: Z, h: BUTTON}, {t: X, h: ⌥}, C, D, V,
+       K, H, ",", {t: ".", h: ⌥}, {t: /, h: BUTTON}, {t: /, h: ⇧}]
+    - [{t: ␛, h: MEDIA}, {t: ␣, h: NAV}, {t: ⇥, h: MOUSE},
+       {t: ⏎, h: SYM}, {t: ⌫, h: NUM}, {t: ⌦, h: FUN}]
+
+  EXTRA (QWERTY) - EN:
+    - [{t: '\', h: ⊕, s: "2x: BASE"}, Q, W, E, R, T,
+       Y, U, I, O, P, {t: '[', h: ⊕}]
+    - [{t: ']', h: Hyper}, {t: A, h: ⌘}, {t: S, h: ⌥}, {t: D, h: ⌃}, {t: F, h: ⇧}, G,
+       H, {t: J, h: ⇧}, {t: K, h: ⌃}, {t: L, h: ⌥}, {t: ";", h: ⌘}, {t: "'", h: Hyper}]
+    - [{t: ⌃+␣, h: ⇧}, {t: Z, h: BUTTON}, {t: X, h: ⌥}, C, V, B,
+       N, M, ",", {t: ".", h: ⌥}, {t: /, h: BUTTON}, {t: /, h: ⇧}]
+    - [{t: ␛, h: MEDIA}, {t: ␣, h: NAV}, {t: ⇥, h: MOUSE},
+       {t: ⏎, h: SYM}, {t: ⌫, h: NUM}, {t: ⌦, h: FUN}]
+
+  EXTRA (QWERTY) - RU/UA:
+    - [{t: "Ё/ʼ", h: ⊕, s: "2x: BASE"}, Й, Ц, У, К, Е,
+       Н, Г, Ш, Щ, З, {t: Х, h: ⊕}]
+    - [{t: "Ъ/Ї", h: Hyper}, {t: Ф, h: ⌘}, {t: "Ы/И", h: ⌥}, {t: В, h: ⌃}, {t: А, h: ⇧}, П,
+       Р, {t: О, h: ⇧}, {t: Л, h: ⌃}, {t: Д, h: ⌥}, {t: Ж, h: ⌘}, {t: "Э/Є", h: Hyper}]
+    - [{t: ⌃+␣, h: ⇧}, {t: Я, h: BUTTON}, {t: Ч, h: ⌥}, С, М, "И/І",
+       Т, Ь, Б, {t: Ю, h: ⌥}, {t: ".", h: BUTTON}, {t: /, h: ⇧}]
+    - [{t: ␛, h: MEDIA}, {t: ␣, h: NAV}, {t: ⇥, h: MOUSE},
+       {t: ⏎, h: SYM}, {t: ⌫, h: NUM}, {t: ⌦, h: FUN}]
+
+  TAP:
+    - [{t: '\', h: ⊕, s: "2x: BASE"}, Q, W, F, P, B,
+       J, L, U, Y, "'", {t: '[', h: ⊕}]
+    - [{t: ']', h: Hyper}, A, R, S, T, G,
+       M, N, E, I, O, {t: "'", h: Hyper}]
+    - [{t: ⌃+␣, h: ⇧}, Z, X, C, D, V,
+       K, H, ",", ".", /, {t: /, h: ⇧}]
+    - [␛, ␣, ⇥,
+       ⏎, ⌫, ⌦]
+
+  BUTTON:
+    - [Boot, Undo, Cut, Copy, Paste, Redo,
+       Redo, Paste, Copy, Cut, Undo, Boot]
+    - [Boot, ⌘, ⌥, ⌃, ⇧, ⊕,
+       ⊕, ⇧, ⌃, ⌥, ⌘, Boot]
+    - [Boot, {t: Undo, type: held}, Cut, Copy, Paste, Redo,
+       Redo, Paste, Copy, Cut, {t: Undo, type: held}, Boot]
+    - [MB3, MB1, MB2,
+       MB2, MB1, MB3]
+
+  NAV:
+    - [MC Apps, Boot, {t: "→ TAP"}, {t: "→ EXTRA"}, {t: "→ BASE"}, PrtSc,
+       PgUp, Home, ↑, End, Ins, ␛]
+    - [MC Wins, ⌘, ⌥, ⌃, ⇧, ScrLk,
+       PgDn, ←, ↓, →, Caps Word, Hyper]
+    - [Spotlight, "", ⌥, {t: "→ NUM"}, {t: "→ NAV"}, Menu,
+       Redo, Paste, Copy, Cut, Undo, ⊕]
+    - ["", {type: held}, "",
+       ⏎, ⌫, ⌦]
+
+  MOUSE:
+    - [MC Apps, Boot, {t: "→ TAP"}, {t: "→ EXTRA"}, {t: "→ BASE"}, PrtSc,
+       "", Wh →, ⇡, Wh ←, Wh ↓, ␛]
+    - [MC Wins, ⌘, ⌥, ⌃, ⇧, ScrLk,
+       "", ⇠, ⇣, ⇢, Wh ↑, Hyper]
+    - [Spotlight, "", ⌥, {t: "→ SYM"}, {t: "→ MOUSE"}, Menu,
+       Redo, Paste, Copy, Cut, Undo, ⊕]
+    - ["", "", {type: held},
+       MB2, MB1, MB3]
+
+  MEDIA:
+    - [MC Apps, Boot, {t: "→ TAP"}, {t: "→ EXTRA"}, {t: "→ BASE"}, Bat Status,
+       RGB Tog, RGB Fx, ♪+, RGB Hue, RGB Sat, ␛]
+    - [MC Wins, ⌘, ⌥, ⌃, ⇧, "Ind On",
+       Ext Pwr, ⏮, ♪-, ⏭, RGB Bri, Hyper]
+    - [Spotlight, "", ⌥, {t: "→ FUN"}, {t: "→ MEDIA"}, Power,
+       Out Tog, BT 0, BT 1, BT 2, BT 3, ⊕]
+    - [{type: held}, "", "",
+       ⏹, ⏯, ♪✕]
+
+  NUM:
+    - [MC Apps, "[", "7", "8", "9", "]",
+       "", {t: "→ BASE"}, {t: "→ EXTRA"}, {t: "→ TAP"}, Boot, ␛]
+    - [MC Wins, ";", "4", "5", "6", "=",
+       "", ⇧, ⌃, ⌥, ⌘, Hyper]
+    - [Spotlight, "`", "1", "2", "3", '\',
+       "", {t: "→ NUM"}, {t: "→ NAV"}, ⌥, "", ⊕]
+    - [".", "0", "-",
+       "", {type: held}, ""]
+
+  SYM:
+    - [MC Apps, "{", "&amp;", "*", "(", "}",
+       "", {t: "→ BASE"}, {t: "→ EXTRA"}, {t: "→ TAP"}, Boot, ␛]
+    - [MC Wins, ":", "$", "%", "^", "+",
+       "", ⇧, ⌃, ⌥, ⌘, Hyper]
+    - [Spotlight, "~", "!", "@", "#", "|",
+       "", {t: "→ SYM"}, {t: "→ MOUSE"}, ⌥, "", ⊕]
+    - ["(", ")", "_",
+       {type: held}, "", ""]
+
+  FUN:
+    - [MC Apps, F12, F7, F8, F9, PrtSc,
+       "", {t: "→ BASE"}, {t: "→ EXTRA"}, {t: "→ TAP"}, Boot, ␛]
+    - [MC Wins, F11, F4, F5, F6, ScrLk,
+       "", ⇧, ⌃, ⌥, ⌘, Hyper]
+    - [Spotlight, F10, F1, F2, F3, Pause,
+       "", {t: "→ FUN"}, {t: "→ MEDIA"}, ⌥, "", ⊕]
+    - [App, ␣, ⇥,
+       "", "", {type: held}]
