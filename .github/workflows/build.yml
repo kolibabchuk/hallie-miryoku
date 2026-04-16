@@ -263,10 +263,12 @@ jobs:
 
       - name: Parse and draw
         run: |
-          keymap parse -z keymap-input/keymap.pre.dts \
-            --layout-map-file main/assets/keymap-drawer/layout-override.json \
-            > /tmp/parsed.yaml
-          keymap draw /tmp/parsed.yaml > assets/keymap.svg
+          keymap parse -z keymap-input/keymap.pre.dts > /tmp/parsed.yaml
+          keymap draw \
+            -j main/assets/keymap-drawer/layout-override.json \
+            -l LAYOUT_hallie \
+            /tmp/parsed.yaml \
+            > assets/keymap.svg
 
       - name: Commit SVG to assets branch
         working-directory: assets
