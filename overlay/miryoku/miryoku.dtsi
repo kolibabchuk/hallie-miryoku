@@ -16,6 +16,18 @@
 
 #include <dt-bindings/zmk/pointing.h>
 
+// keymap-drawer sets KEYMAP_DRAWER in its cpp preamble. Its parser splits on
+// whitespace inside binding args, so ZMK's pointing.h MOVE_X/Y (which expand
+// to multi-token expressions like "(((val) & 0xFFFF) << 16)") confuse it —
+// a &msc SCRL_LEFT becomes three "bindings" and key counts break. Override
+// to identity for drawer-only runs; real firmware builds ignore this block.
+#ifdef KEYMAP_DRAWER
+  #undef MOVE_X
+  #undef MOVE_Y
+  #define MOVE_X(x) x
+  #define MOVE_Y(x) x
+#endif
+
 / {
   keymap {
     compatible = "zmk,keymap";

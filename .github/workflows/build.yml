@@ -205,39 +205,17 @@ jobs:
           name: hallie-${{ matrix.board }}
           path: artifacts/
 
-      # Keymap is identical on both halves; only snapshot hallie_left's
-      # preprocessed DTS for downstream keymap-drawer consumption.
-      - name: Snapshot preprocessed DTS for keymap-drawer
-        if: matrix.board == 'hallie_left' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
-        run: |
-          mkdir -p keymap-drawer-input
-          # Zephyr emits the C-preprocessed DTS as zephyr.dts.pre.tmp, then
-          # resolves it into zephyr.dts. keymap-drawer works on either.
-          for candidate in zephyr.dts.pre.tmp zephyr.dts.pre zephyr.dts; do
-            if [ -f "zmk/app/build/zephyr/$candidate" ]; then
-              cp "zmk/app/build/zephyr/$candidate" keymap-drawer-input/keymap.pre.dts
-              echo "Using $candidate"
-              break
-            fi
-          done
-          test -f keymap-drawer-input/keymap.pre.dts
-
-      - name: Upload preprocessed DTS
-        if: matrix.board == 'hallie_left' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
-        uses: actions/upload-artifact@v7
-        with:
-          name: keymap-preprocessed
-          path: keymap-drawer-input/
-          retention-days: 1
-
   draw-keymap:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      MIRYOKU_ZMK_REF: 559aa4beae75cb3206ab411b7da2adb9665c6896
+      FEATURE_REF: fa2bf40cd5f375ad9856fd4d1266ae9d1d0c2055
     steps:
-      - name: Checkout main for layout-override.json
+      - name: Checkout main for overlay + layout-override.json
         uses: actions/checkout@v6
         with:
           path: main
@@ -248,12 +226,6 @@ jobs:
           ref: assets
           path: assets
 
-      - name: Download preprocessed DTS
-        uses: actions/download-artifact@v7
-        with:
-          name: keymap-preprocessed
-          path: keymap-input/
-
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -261,9 +233,62 @@ jobs:
       - name: Install keymap-drawer
         run: pip install keymap-drawer
 
+      # Replicate the build job's overlay assembly so keymap-drawer sees the
+      # same keymap the firmware would. We can't feed it Zephyr's preprocessed
+      # output — its ZMK parser runs its own cpp and expects a .keymap source.
+      - name: Clone upstream miryoku_zmk
+        run: |
+          git init miryoku_zmk
+          cd miryoku_zmk
+          git remote add origin https://github.com/manna-harbour/miryoku_zmk.git
+          git fetch --depth 1 origin "$MIRYOKU_ZMK_REF"
+          git checkout FETCH_HEAD
+
+      - name: Clone SplittedSpace feature module (for &ind behavior includes)
+        run: |
+          git init zmk-feature
+          cd zmk-feature
+          git remote add origin https://github.com/SplittedSpace/zmk-feature-splittedspace.git
+          git fetch --depth 1 origin "$FEATURE_REF"
+          git checkout FETCH_HEAD
+
+      - name: Overlay layout files onto miryoku_zmk
+        run: |
+          cp main/overlay/config/hallie.keymap          miryoku_zmk/config/hallie.keymap
+          cp main/overlay/miryoku/miryoku.dtsi          miryoku_zmk/miryoku/miryoku.dtsi
+          cp main/overlay/miryoku/miryoku_double_tap_guard.dtsi miryoku_zmk/miryoku/miryoku_double_tap_guard.dtsi
+          cp main/overlay/miryoku/custom_config.h       miryoku_zmk/miryoku/custom_config.h
+          cp main/overlay/miryoku/miryoku_behaviors.dtsi miryoku_zmk/miryoku/miryoku_behaviors.dtsi
+          cp main/overlay/miryoku/miryoku_behaviors.h   miryoku_zmk/miryoku/miryoku_behaviors.h
+          mkdir -p miryoku_zmk/miryoku/mapping/42
+          cp main/overlay/miryoku/mapping/42/hallie.h   miryoku_zmk/miryoku/mapping/42/hallie.h
+          cp main/overlay/miryoku/miryoku_babel/miryoku_layer_list.h miryoku_zmk/miryoku/miryoku_babel/miryoku_layer_list.h
+
+      - name: Write keymap-drawer config
+        run: |
+          # Important: do NOT include zmk/app/include or zmk/app/dts.
+          # keymap-drawer's preprocessor passes through unresolved includes
+          # (pcpp IgnoreAndPassThrough), which keeps ZMK keycodes like LGUI /
+          # C_VOL_UP / SCRL_LEFT as symbolic names that zmk_keycode_map can
+          # display. Resolving them would expand to raw hex, bypassing the map.
+          cat > kd_config.yaml <<'EOF'
+          parse_config:
+            preprocess: true
+            zmk_preamble: |
+              #define KEYMAP_DRAWER
+              #define MIRYOKU_KEYBOARD_HALLIE
+              #define MIRYOKU_NAV_INVERTEDT
+              #define MIRYOKU_CLIPBOARD_MAC
+            zmk_additional_includes:
+              - miryoku_zmk/miryoku
+              - miryoku_zmk
+              - zmk-feature/dts
+              - zmk-feature/include
+          EOF
+
       - name: Parse and draw
         run: |
-          keymap parse -z keymap-input/keymap.pre.dts > /tmp/parsed.yaml
+          keymap -c kd_config.yaml parse -z miryoku_zmk/config/hallie.keymap > /tmp/parsed.yaml
           keymap draw \
             -j main/assets/keymap-drawer/layout-override.json \
             -l LAYOUT_hallie \
