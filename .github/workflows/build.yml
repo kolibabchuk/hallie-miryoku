@@ -27,7 +27,7 @@ on:
         default: 'SplittedSpace/zmk-keyboards-splittedspace'
       keyboards_ref:
         description: 'Hallie board module branch/tag/SHA'
-        default: 'e83cb6caf022f256bb94747607d6ab084d2580bc'
+        default: 'cdaf5f78081bcebae8738aaf02a0e7647fb592e3'
       feature_repo:
         description: 'Hallie feature module repository (user/repo)'
         default: 'SplittedSpace/zmk-feature-splittedspace'
@@ -51,7 +51,7 @@ jobs:
       MIRYOKU_ZMK_REF: ${{ inputs.miryoku_zmk_ref || '559aa4beae75cb3206ab411b7da2adb9665c6896' }}
       ZMK_REF: ${{ inputs.zmk_ref || 'v0.3.0' }}
       KEYBOARDS_REPO: ${{ inputs.keyboards_repo || 'SplittedSpace/zmk-keyboards-splittedspace' }}
-      KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'e83cb6caf022f256bb94747607d6ab084d2580bc' }}
+      KEYBOARDS_REF: ${{ inputs.keyboards_ref || 'cdaf5f78081bcebae8738aaf02a0e7647fb592e3' }}
       FEATURE_REPO: ${{ inputs.feature_repo || 'SplittedSpace/zmk-feature-splittedspace' }}
       FEATURE_REF: ${{ inputs.feature_ref || 'fa2bf40cd5f375ad9856fd4d1266ae9d1d0c2055' }}
     steps:
